@@ -1,30 +1,22 @@
-const axios = require('axios');
+import axios from 'axios';
 
-module.exports = async (req, res) => {
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' });
-    }
+export default async function handler(req, res) {
+  const { prompt } = req.query;
 
-    try {
-        const { prompt } = req.body;
+  if (!prompt || prompt.trim() === "") {
+    return res.status(400).json({ error: "Prompt is required" });
+  }
 
-        if (!prompt) {
-            return res.status(400).json({ error: 'Prompt is required' });
-        }
+  const imageUrl = `http://ai.pollinations.ai/prompt/${encodeURIComponent(prompt)}`;
 
-        // Enhance the prompt with additional parameters for better results
-        const enhancedPrompt = `${prompt}, high quality, detailed, professional photography, 8k resolution, trending on artstation`;
+  try {
+    // Ping the image URL to make sure it's reachable
+    await axios.get(imageUrl, { responseType: 'arraybuffer' });
 
-        // Encode the prompt for the URL
-        const encodedPrompt = encodeURIComponent(enhancedPrompt);
-        
-        // Generate the image URL
-        const imageUrl = `http://ai.pollinations.ai/prompt/${encodedPrompt}`;
-
-        // Return the image URL
-        return res.status(200).json({ imageUrl });
-    } catch (error) {
-        console.error('Error generating image:', error);
-        return res.status(500).json({ error: 'Failed to generate image' });
-    }
-}; 
+    // Return the image URL to frontend
+    res.status(200).json({ imageUrl });
+  } catch (err) {
+    console.error("Pollinations API error:", err.message);
+    res.status(500).json({ error: "Failed to fetch image from Pollinations" });
+  }
+}
