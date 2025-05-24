@@ -7,7 +7,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Prompt is required" });
     }
   
-    const imageUrl = `http://ai.pollinations.ai/prompt/${encodeURIComponent(prompt)}`;
+    const imageUrl = `http://pollinations.ai/prompt/${encodeURIComponent(prompt)}`;
   
     // Don't fetch the image — just send the URL
     res.setHeader('Content-Type', 'application/json');
